@@ -1,0 +1,42 @@
+version: "3"
+
+volumes:
+  db:
+  wordpress:
+
+networks:
+  inception:
+    external: false
+
+services:
+  nginx:
+    container_name: inception-nginx
+    networks:
+      - inception
+    environment:
+      - TZ=Europe/Paris
+    depends_on:
+      - wordpress-php
+      - db
+    volumes:
+      - wordpress
+    restart: unless-stopped
+
+  wordpress-php:
+    container_name: inception-workp-php
+    networks:
+      - inception
+    environment:
+      - TZ=Europe/Paris
+    depends_on:
+      - db
+    restart: unless-stopped
+
+  db:
+    container_name: inception-db
+    networks:
+      - inception
+    environment:
+      - TZ=Europe/Paris
+    restart: unless-stopped
+
