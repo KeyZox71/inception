@@ -1,8 +1,9 @@
 version: "3"
+name: inception
 
 volumes:
-  db:
-  wordpress:
+  wp-db:
+  wp-site:
 
 networks:
   inception:
@@ -19,7 +20,9 @@ services:
       - wordpress-php
       - db
     volumes:
-      - wordpress
+      - wp-site:/var/www/html
+    ports:
+      - "443:443"
     restart: unless-stopped
 
   wordpress-php:
@@ -28,6 +31,8 @@ services:
       - inception
     environment:
       - TZ=Europe/Paris
+    volumes:
+      - wp-site:/var/www/html
     depends_on:
       - db
     restart: unless-stopped
@@ -38,5 +43,6 @@ services:
       - inception
     environment:
       - TZ=Europe/Paris
+    volumes:
+      - wp-db:/var/lib/mysql
     restart: unless-stopped
-
