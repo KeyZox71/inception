@@ -22,8 +22,9 @@
 
 					];
 					packages = with pkgs; [
+						go
 						git
-						vault
+						gopls
 						inputs.pogit.packages.${pkgs.system}.default
 					];
 				};

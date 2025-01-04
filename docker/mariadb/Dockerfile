@@ -19,9 +19,7 @@ VOLUME			/var/lib/mysql
 COPY			--chmod=0741 healthcheck.sh /healthcheck.sh
 COPY			--chmod=0741 docker-entrypoint.sh /docker-entrypoint.sh
 
-ENTRYPOINT		[ "/docker-entrypoint.sh" ]
-WORKDIR			/var/lib/mysql
-
 USER			mysql
 EXPOSE			3306
-CMD				[ "mariadbd" ]
+WORKDIR			/var/lib/mysql
+ENTRYPOINT		[ "/docker-entrypoint" ]
