@@ -1,0 +1,8 @@
+[mariadb]
+host-cache-size=0
+skip-name-resolve
+
+expire_logs_days=10
+
+!includedir /etc/mysql/mariadb.conf.d
+!includedir /etc/mysql/conf.d

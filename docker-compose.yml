@@ -1,4 +1,3 @@
-version: "3"
 name: inception
 
 volumes:
@@ -12,6 +11,9 @@ networks:
 services:
   nginx:
     container_name: inception-nginx
+    build:
+      context: .
+      dockerfile: docker/nginx/Dockerfile
     networks:
       - inception
     environment:
@@ -27,6 +29,9 @@ services:
 
   wordpress-php:
     container_name: inception-workp-php
+    build:
+      context: .
+      dockerfile: docker/wordpress/dockerfile
     networks:
       - inception
     environment:
@@ -39,9 +44,16 @@ services:
 
   db:
     container_name: inception-db
+    build:
+      context: .
+      dockerfile: docker/mariadb/Dockerfile
     networks:
       - inception
     environment:
+      - MYSQL_ROOT_PASSWORD="alpine"
+      - MYSQL_PASSWORD="alpine"
+      - MYSQL_USER="kanel"
+      - MYSQL_DATABASE="knl"
       - TZ=Europe/Paris
     volumes:
       - wp-db:/var/lib/mysql

@@ -8,11 +8,13 @@ DOCKERFILE_DB := $(DOCKER_FOLDER)/$(DB_SERVER_NAME)/Dockerfile
 DOCKERFILE_WEVSRV := $(DOCKER_FOLDER)/$(WEB_SERVER_NAME)/Dockerfile
 DOCKERFILE_CMS := $(DOCKER_FOLDER)/$(CMS_NAME)/Dockerfile
 
-mariadb-build:
+db-build:
 	docker build -f $(DOCKERFILE_DB) -t $(DB_SERVER_NAME) .
 
-nginx-build:
+websrv-build:
 	docker build -f $(DOCKERFILE_WEVSRV) -t $(WEB_SERVER_NAME) .
 
-wp-build:
+cms-build:
 	docker build -f $(DOCKERFILE_CMS) -t $(CMS_NAME) .
+
+.PHONY: cms-build db-build websrv-build
