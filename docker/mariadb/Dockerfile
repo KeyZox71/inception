@@ -12,7 +12,7 @@ COPY			go.mod /build/go.mod
 COPY			cmd /build/cmd
 COPY			internal /build/internal
 
-RUN				apk add --no-cache go mariadb tzdata \
+RUN				apk add --no-cache go mariadb tzdata mariadb-client \
 				&& cd /build \
 				&& go build git.keyzox.me/42_adjoly/inception/cmd/mariadb/entrypoint \
 				&& go build git.keyzox.me/42_adjoly/inception/cmd/mariadb/healthcheck \
@@ -29,7 +29,7 @@ RUN				apk add --no-cache go mariadb tzdata \
 
 ENV				LANG=C.UTF-8
 
-COPY			--chmod=0644 configs/mariadb/docker.cnf /etc/my.cnf.d/
+COPY			--chmod=0644 configs/mariadb/docker.cnf /etc/my.cnf.d/mariadb-server.cnf.d
 
 VOLUME			/var/lib/mysql
 

@@ -13,7 +13,7 @@ services:
     container_name: inception-nginx
     build:
       context: .
-      dockerfile: docker/nginx/Dockerfile
+      dockerfile: docker/nginx/dockerfile
     networks:
       - inception
     environment:

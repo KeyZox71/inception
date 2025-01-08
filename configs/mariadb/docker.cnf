@@ -1,8 +1,14 @@
 [mariadb]
 host-cache-size=0
 skip-name-resolve
+port=3306
+
 
 expire_logs_days=10
 
-!includedir /etc/mysql/mariadb.conf.d
 !includedir /etc/mysql/conf.d
+
+[mysqld]
+port=3306
+socket=/run/mysqld/mysqld.sock
+bind-address=0.0.0.0

@@ -7,10 +7,57 @@ import (
 	"os"
 	"os/exec"
 	"time"
+	"strings"
+	"bufio"
 
 	"git.keyzox.me/42_adjoly/inception/internal/env"
 	"git.keyzox.me/42_adjoly/inception/internal/log"
 )
+
+func removeSkipNetworking(filePath string) error {
+	// Open the file for reading
+	file, err := os.Open(filePath)
+	if err != nil {
+		return fmt.Errorf("failed to open file: %v", err)
+	}
+	defer file.Close()
+
+	// Create a temporary slice to store updated lines
+	var updatedLines []string
+
+	// Read the file line by line
+	scanner := bufio.NewScanner(file)
+	for scanner.Scan() {
+		line := scanner.Text()
+
+		// Skip lines that contain "skip-networking"
+		if !strings.Contains(line, "skip-networking") {
+			updatedLines = append(updatedLines, line)
+		}
+	}
+
+	// Check for scanner errors
+	if err := scanner.Err(); err != nil {
+		return fmt.Errorf("error reading file: %v", err)
+	}
+
+	// Open the file for writing (overwrite mode)
+	file, err = os.Create(filePath)
+	if err != nil {
+		return fmt.Errorf("failed to open file for writing: %v", err)
+	}
+	defer file.Close()
+
+	// Write the updated lines back to the file
+	writer := bufio.NewWriter(file)
+	for _, line := range updatedLines {
+		_, err := writer.WriteString(line + "\n")
+		if err != nil {
+			return fmt.Errorf("failed to write to file: %v", err)
+		}
+	}
+	return writer.Flush()
+}
 
 func createDBDir(dataDir string) {
 	if dataDir == "/var/lib/mysql" {
@@ -33,27 +80,41 @@ func checkOlderDB(dataDir string) bool {
 	return true
 }
 
-func waitForMariaDB() {
+func waitForMariaDB(rootPass string) {
 	for i := 0; i < 30; i++ {
-		cmd := exec.Command("mysql", "-uroot", "-e", "SELECT 1")
+		cmd := exec.Command("mariadb", "-uroot", "-p"+escapePassword(rootPass), "-e", "SELECT 1")
+		cmd.Stdout = os.Stdout
+		cmd.Stderr = os.Stderr
 		if err := cmd.Run(); err == nil {
+			fmt.Println("MariaDB is ready.")
 			return
+		} else {
+			fmt.Printf("MariaDB init process in progress... (%d/%d): %v\n", i+1, 30, err)
 		}
-		fmt.Println("MariaDB init process in progress...")
 		time.Sleep(1 * time.Second)
 	}
 	fmt.Println("MariaDB init process failed.")
 	os.Exit(1)
 }
 
+func escapeIdentifier(identifier string) string {
+	// Replace backticks with double backticks to safely escape identifiers
+	return fmt.Sprintf("`%s`", strings.ReplaceAll(identifier, "'", "\""))
+}
+
+func escapePassword(password string) string {
+	// Escape single quotes in passwords
+	return strings.ReplaceAll(password, "'", "\\'")
+}
+
 func configureMariaDB(rootPassword, user, password, database string) {
-	cmd := exec.Command("mysql", "-uroot", "-e", fmt.Sprintf(`
+	cmd := exec.Command("mariadb", "-uroot", "-p"+rootPassword, "-e", fmt.Sprintf(`
 		ALTER USER 'root'@'localhost' IDENTIFIED BY '%s';
 		CREATE DATABASE IF NOT EXISTS %s;
 		CREATE USER IF NOT EXISTS '%s'@'%%' IDENTIFIED BY '%s';
 		GRANT ALL PRIVILEGES ON %s.* TO '%s'@'%%';
 		FLUSH PRIVILEGES;
-	`, rootPassword, database, user, password, database, user))
+	`, escapePassword(rootPassword), escapeIdentifier(database), escapeIdentifier(user), escapePassword(password), escapeIdentifier(database), escapeIdentifier(user)))
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
 	if err := cmd.Run(); err != nil {
@@ -74,6 +135,7 @@ func main() {
 		user := env.FileEnv("MYSQL_USER", "mariadb")
 		dbName := env.EnvCheck("MYSQL_DATABASE", "default")
 		dataDir := env.EnvCheck("DATADIR", "/var/lib/mysql")
+		filePath := "/etc/my.cnf.d/mariadb-server.cnf"
 
 		oldDB := checkOlderDB(dataDir)
 		if oldDB == false {
@@ -82,7 +144,6 @@ func main() {
 			cmd := exec.Command("mariadb-install-db", "--user=mysql", "--ldata="+dataDir)
 			cmd.Stdout = os.Stdout
 			cmd.Stderr = os.Stderr
-			createDBDir(dataDir)
 			if err := cmd.Run(); err != nil {
 				_log.Log("error", "Error initializing MariaDB")
 			}
@@ -96,11 +157,18 @@ func main() {
 				os.Exit(1)
 			}
 			// Wait for mariadb to start
-			waitForMariaDB()
+			waitForMariaDB(rootPass)
 
 			configureMariaDB(rootPass, user, pass, dbName)
 
-			if err := cmd.Process.Kill(); err != nil {
+			if err := removeSkipNetworking(filePath); err != nil {
+				fmt.Printf("Error: %v\n", err)
+			} else {
+				fmt.Println("Successfully removed 'skip-networking' from the configuration file.")
+			}
+
+			cmd = exec.Command("mysqladmin", "-uroot", "-p"+rootPass, "shutdown")
+			if err := cmd.Run(); err != nil {
 				fmt.Printf("Error stopping MariaDB: %v\n", err)
 			}
 		}
