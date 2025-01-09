@@ -1,7 +1,6 @@
 package main
 
 import (
-	"errors"
 	"fmt"
 	"log"
 	"os"
@@ -67,14 +66,29 @@ func createDBDir(dataDir string) {
 	if err != nil {
 		log.Fatal(err)
 	}
-	err = os.Mkdir(dataDir+"/.already", 750)
+}
+
+func anyFileExists(folderPath string) (bool, error) {
+	// Open the folder
+	dir, err := os.Open(folderPath)
 	if err != nil {
-		log.Fatal(err)
+		return false, err
 	}
+	defer dir.Close()
+
+	// Read directory contents
+	files, err := dir.Readdir(1) // Read at most 1 file
+	if err != nil {
+		return false, err
+	}
+
+	// If we read at least one file, it exists
+	return len(files) > 0, nil
 }
 
 func checkOlderDB(dataDir string) bool {
-	if _, err := os.Stat(dataDir+"/.already"); errors.Is(err, os.ErrNotExist) {
+	exist, err := anyFileExists(dataDir)
+	if err != nil || exist == false {
 		return false
 	}
 	return true
