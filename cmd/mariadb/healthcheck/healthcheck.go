@@ -5,7 +5,6 @@ import (
 	"os"
 	"os/exec"
 	"strings"
-	"time"
 
 	"git.keyzox.me/42_adjoly/inception/internal/env"
 )
@@ -37,13 +36,8 @@ func main() {
 	host := "127.0.0.1"
 	port := "3306"
 
-	// Retry health check for MariaDB
-	for i := 0; i < 10; i++ {
-		if checkMariaDB(user, password, host, port) {
-			os.Exit(0) // Success
-		}
-		fmt.Println("Waiting for MariaDB to become ready...")
-		time.Sleep(2 * time.Second)
+	if checkMariaDB(user, password, host, port) {
+		os.Exit(0) // Success
 	}
 
 	fmt.Println("MariaDB health check failed")
