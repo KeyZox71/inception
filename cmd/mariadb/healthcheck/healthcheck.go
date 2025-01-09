@@ -1,60 +1,51 @@
 package main
 
 import (
-	"database/sql"
 	"fmt"
 	"os"
+	"os/exec"
 	"strings"
+	"time"
 
 	"git.keyzox.me/42_adjoly/inception/internal/env"
-	"git.keyzox.me/42_adjoly/inception/internal/log"
 )
 
-func escapeIdentifier(identifier string) string {
-	// Replace backticks with double backticks to safely escape identifiers
-	return fmt.Sprintf("`%s`", strings.ReplaceAll(identifier, "'", "\""))
+func checkMariaDB(user, password, host, port string) bool {
+	// Create the command to run mariadb client
+	cmd := exec.Command("mariadb", "-u"+user, "-p"+password, "-h"+host, "-P"+port, "-e", "SELECT 1;")
+	
+	// Run the command
+	err := cmd.Run()
+	if err != nil {
+		fmt.Printf("Health check failed: %v\n", err)
+		return false
+	}
+	fmt.Println("MariaDB is healthy")
+	return true
 }
 
 func escapePassword(password string) string {
 	// Escape single quotes in passwords
-	return strings.ReplaceAll(password, "'", "\\'")
-}
-
-func checkHealth(host, user, pass, port, dbName string) bool {
-	dsn := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s", user, pass, host, port, dbName)
-
-	// Attempt to open a database connection
-	db, err := sql.Open("mysql", dsn)
-	if err != nil {
-		_log.Log("warning", fmt.Sprintf("Failed to open database connection: %v", err))
-		return false
-	}
-	defer db.Close()
-
-	// Attempt to ping the database
-	if err := db.Ping(); err != nil {
-		_log.Log("warning", fmt.Sprintf("Health check failed: %v", err))
-		return false
-	}
-
-	_log.Log("note", "Health check passed successfully")
-	return true
+	new := strings.ReplaceAll(password, "\"", "")
+	return strings.ReplaceAll(new, "'", "\\'")
 }
 
 func main() {
-	// Load environment variables
-	pass := escapePassword(env.FileEnv("MYSQL_PASSWORD", "default"))
-	user := escapeIdentifier(env.FileEnv("MYSQL_USER", "mariadb"))
-	dbName := escapeIdentifier(env.EnvCheck("MYSQL_DATABASE", "default"))
-	dbHost := "127.0.0.1"
+	// Configuration
+	user := escapePassword(env.FileEnv("MYSQL_USER", "mariadb"))
+	password := escapePassword(env.FileEnv("MYSQL_PASSWORD", "default"))
+	host := "127.0.0.1"
+	port := "3306"
 
-	// Perform the health check
-	res := checkHealth(dbHost, user, pass, "3306", dbName)
-	if res {
-		_log.Log("note", "MariaDB is healthy")
-		os.Exit(0)
+	// Retry health check for MariaDB
+	for i := 0; i < 10; i++ {
+		if checkMariaDB(user, password, host, port) {
+			os.Exit(0) // Success
+		}
+		fmt.Println("Waiting for MariaDB to become ready...")
+		time.Sleep(2 * time.Second)
 	}
 
-	_log.Log("warning", "Health check failed")
-	os.Exit(1)
+	fmt.Println("MariaDB health check failed")
+	os.Exit(1) // Failure
 }
