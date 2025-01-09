@@ -8,13 +8,21 @@ DOCKERFILE_DB := $(DOCKER_FOLDER)/$(DB_SERVER_NAME)/Dockerfile
 DOCKERFILE_WEVSRV := $(DOCKER_FOLDER)/$(WEB_SERVER_NAME)/Dockerfile
 DOCKERFILE_CMS := $(DOCKER_FOLDER)/$(CMS_NAME)/Dockerfile
 
-db-build:
+build-db:
 	docker build -f $(DOCKERFILE_DB) -t $(DB_SERVER_NAME) .
 
-websrv-build:
+build-websrv:
 	docker build -f $(DOCKERFILE_WEVSRV) -t $(WEB_SERVER_NAME) .
 
-cms-build:
+build-cms:
 	docker build -f $(DOCKERFILE_CMS) -t $(CMS_NAME) .
+
+start-db:
+	docker compose up db --build
+
+clean-db:
+	docker stop inception-db
+	docker container rm inception-db
+	docker volume rm inception_wp-db
 
 .PHONY: cms-build db-build websrv-build

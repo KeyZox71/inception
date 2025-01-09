@@ -36,7 +36,6 @@ VOLUME			/var/lib/mysql
 ENTRYPOINT		[ "/docker-entrypoint" ]
 WORKDIR			/var/lib/mysql
 
-#USER			mysql
 EXPOSE			3306
 CMD				[ "mariadbd", "--user=mysql" ]
 HEALTHCHECK		--interval=30s --timeout=10s --retries=3 CMD /docker-healthcheck

@@ -111,30 +111,44 @@ func waitForMariaDB(rootPass string) {
 	os.Exit(1)
 }
 
-func escapeIdentifier(identifier string) string {
-	// Replace backticks with double backticks to safely escape identifiers
-	return fmt.Sprintf("`%s`", strings.ReplaceAll(identifier, "'", "\""))
-}
+//func escapeIdentifier(identifier string) string {
+//	// Replace backticks with double backticks to safely escape identifiers
+//	return fmt.Sprintf("%s", strings.ReplaceAll(identifier, "'", "\""))
+//}
 
 func escapePassword(password string) string {
 	// Escape single quotes in passwords
-	return strings.ReplaceAll(password, "'", "\\'")
+	new := strings.ReplaceAll(password, "\"", "")
+	return strings.ReplaceAll(new, "'", "\\'")
 }
 
 func configureMariaDB(rootPassword, user, password, database string) {
-	cmd := exec.Command("mariadb", "-uroot", "-p"+rootPassword, "-e", fmt.Sprintf(`
+	cmd := exec.Command("mariadb", "-uroot", "-e", fmt.Sprintf(`
 		ALTER USER 'root'@'localhost' IDENTIFIED BY '%s';
 		CREATE DATABASE IF NOT EXISTS %s;
-		CREATE USER IF NOT EXISTS '%s'@'%%' IDENTIFIED BY '%s';
+		CREATE USER IF NOT EXISTS '%s'@'%%';
+		GRANT ALL PRIVILEGES ON %s.* TO '%s'@'localhost' IDENTIFIED BY '%s';
 		GRANT ALL PRIVILEGES ON %s.* TO '%s'@'%%';
 		FLUSH PRIVILEGES;
-	`, escapePassword(rootPassword), escapeIdentifier(database), escapeIdentifier(user), escapePassword(password), escapeIdentifier(database), escapeIdentifier(user)))
-	cmd.Stdout = os.Stdout
-	cmd.Stderr = os.Stderr
-	if err := cmd.Run(); err != nil {
+	`,
+		escapePassword(rootPassword),
+		escapePassword(database),
+		escapePassword(user),
+		escapePassword(database),
+		escapePassword(user),
+		escapePassword(password),
+		escapePassword(database),
+		escapePassword(user),
+	))
+
+	// Capture standard output and error
+	output, err := cmd.CombinedOutput()
+	if err != nil {
 		fmt.Printf("Error configuring MariaDB: %v\n", err)
+		fmt.Printf("Command Output: %s\n", string(output))
 		os.Exit(1)
 	}
+	fmt.Println("MariaDB configured successfully.")
 }
 
 func main() {
@@ -159,27 +173,29 @@ func main() {
 			cmd.Stdout = os.Stdout
 			cmd.Stderr = os.Stderr
 			if err := cmd.Run(); err != nil {
-				_log.Log("error", "Error initializing MariaDB")
+				_log.Log("error", fmt.Sprintf("Error initializing MariaDB: %v", err))
 			}
 
 			// Starting temp mariadb server for config
-			cmd = exec.Command("mariadbd-safe", "--skip-networking")
+			cmd = exec.Command("mariadbd-safe", "--datadir="+dataDir, "--skip-networking")
 			cmd.Stdout = os.Stdout
 			cmd.Stderr = os.Stderr
 			if err := cmd.Start(); err != nil {
-				fmt.Printf("Error starting MariaDB: %v\n", err)
-				os.Exit(1)
+				_log.Log("error", fmt.Sprintf("Error starting MariaDB: %v", err))
 			}
+
 			// Wait for mariadb to start
 			waitForMariaDB(rootPass)
 
 			configureMariaDB(rootPass, user, pass, dbName)
 
-
-			cmd = exec.Command("mysqladmin", "-uroot", "-p"+rootPass, "shutdown")
-			if err := cmd.Run(); err != nil {
+			cmd_stop := exec.Command("mariadb-admin", "-uroot", "-p"+escapePassword(rootPass), "shutdown")
+			cmd_stop.Stdout = os.Stdout
+			cmd_stop.Stderr = os.Stderr
+			if err := cmd_stop.Run(); err != nil {
 				fmt.Printf("Error stopping MariaDB: %v\n", err)
 			}
+
 		}
 		if err := removeSkipNetworking(filePath); err != nil {
 			fmt.Printf("Error: %v\n", err)
