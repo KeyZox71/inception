@@ -175,16 +175,16 @@ func main() {
 
 			configureMariaDB(rootPass, user, pass, dbName)
 
-			if err := removeSkipNetworking(filePath); err != nil {
-				fmt.Printf("Error: %v\n", err)
-			} else {
-				fmt.Println("Successfully removed 'skip-networking' from the configuration file.")
-			}
 
 			cmd = exec.Command("mysqladmin", "-uroot", "-p"+rootPass, "shutdown")
 			if err := cmd.Run(); err != nil {
 				fmt.Printf("Error stopping MariaDB: %v\n", err)
 			}
+		}
+		if err := removeSkipNetworking(filePath); err != nil {
+			fmt.Printf("Error: %v\n", err)
+		} else {
+			_log.Log("note", "Successfully removed 'skip-networking' from the configuration file.")
 		}
 	}
 
