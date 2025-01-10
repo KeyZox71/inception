@@ -13,12 +13,12 @@ RUN				set -x \
 VOLUME			/etc/nginx
 RUN				mkdir -p /etc/nginx/sites-available
 
-COPY			docker-entrypoint.sh /docker-entrypoint.sh
-RUN				[ "chmod", "+x", "/docker-entrypoint.sh" ]
+COPY			docker-healthcheck.sh /docker-healthcheck.sh
+RUN				chmod +x /docker-healthcheck.sh
 
-ENTRYPOINT		[ "/docker-entrypoint.sh" ]
 WORKDIR			/etc/nginx
 STOPSIGNAL		SIGQUIT
 
 EXPOSE			80
 CMD				[ "nginx", "-g", "daemon off;" ]
+HEALTHCHECK		--interval=30s --timeout=10s --retries=3 CMD /docker-healthcheck.sh

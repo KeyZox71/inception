@@ -2,6 +2,7 @@ package env
 
 import (
 	"os"
+	"strings"
 
 	"git.keyzox.me/42_adjoly/inception/internal/log"
 )
@@ -31,4 +32,14 @@ func	EnvCheck(Value, Default string) string {
 		return val
 	}
 	return Default
+}
+
+func EscapeEnv(str string) string {
+	if str[0] == '"' && str[len(str) - 1] == '"' {
+		return strings.TrimPrefix(strings.TrimSuffix(str, "\""), "\"")
+	} else if str[0] == '"' && str[len(str) - 1] == '"' {
+		return strings.TrimPrefix(strings.TrimSuffix(str, "'"), "'")
+	} else {
+		return str
+	}
 }

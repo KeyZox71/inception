@@ -1,10 +1,9 @@
 package main
 
 import (
-	"fmt"
 	"os"
+	"fmt"
 	"os/exec"
-	"strings"
 
 	"git.keyzox.me/42_adjoly/inception/internal/env"
 )
@@ -23,16 +22,10 @@ func checkMariaDB(user, password, host, port string) bool {
 	return true
 }
 
-func escapePassword(password string) string {
-	// Escape single quotes in passwords
-	new := strings.ReplaceAll(password, "\"", "")
-	return strings.ReplaceAll(new, "'", "\\'")
-}
-
 func main() {
 	// Configuration
-	user := escapePassword(env.FileEnv("MYSQL_USER", "mariadb"))
-	password := escapePassword(env.FileEnv("MYSQL_PASSWORD", "default"))
+	user := env.EscapeEnv(env.FileEnv("MYSQL_USER", "mariadb"))
+	password := env.EscapeEnv(env.FileEnv("MYSQL_PASSWORD", "default"))
 	host := "127.0.0.1"
 	port := "3306"
 

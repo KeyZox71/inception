@@ -20,9 +20,17 @@ build-cms:
 start-db:
 	docker compose up db --build
 
+start-nginx:
+	docker compose up nginx --build
+
+
 clean-db:
 	docker stop inception-db
 	docker container rm inception-db
 	docker volume rm inception_wp-db
 
-.PHONY: cms-build db-build websrv-build
+clean-nginx:
+	docker stop inception-nginx
+	docker container rm inception-nginx
+
+.PHONY: cms-build db-build websrv-build clean-db clean-nginx

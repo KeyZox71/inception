@@ -96,7 +96,7 @@ func checkOlderDB(dataDir string) bool {
 
 func waitForMariaDB(rootPass string) {
 	for i := 0; i < 30; i++ {
-		cmd := exec.Command("mariadb", "-uroot", "-p"+escapePassword(rootPass), "-e", "SELECT 1")
+		cmd := exec.Command("mariadb", "-uroot", "-p"+env.EscapeEnv(rootPass), "-e", "SELECT 1")
 		cmd.Stdout = os.Stdout
 		cmd.Stderr = os.Stderr
 		if err := cmd.Run(); err == nil {
@@ -116,11 +116,6 @@ func waitForMariaDB(rootPass string) {
 //	return fmt.Sprintf("%s", strings.ReplaceAll(identifier, "'", "\""))
 //}
 
-func escapePassword(password string) string {
-	// Escape single quotes in passwords
-	new := strings.ReplaceAll(password, "\"", "")
-	return strings.ReplaceAll(new, "'", "\\'")
-}
 
 func configureMariaDB(rootPassword, user, password, database string) {
 	cmd := exec.Command("mariadb", "-uroot", "-e", fmt.Sprintf(`
@@ -131,14 +126,14 @@ func configureMariaDB(rootPassword, user, password, database string) {
 		GRANT ALL PRIVILEGES ON %s.* TO '%s'@'%%';
 		FLUSH PRIVILEGES;
 	`,
-		escapePassword(rootPassword),
-		escapePassword(database),
-		escapePassword(user),
-		escapePassword(database),
-		escapePassword(user),
-		escapePassword(password),
-		escapePassword(database),
-		escapePassword(user),
+		env.EscapeEnv(rootPassword),
+		env.EscapeEnv(database),
+		env.EscapeEnv(user),
+		env.EscapeEnv(database),
+		env.EscapeEnv(user),
+		env.EscapeEnv(password),
+		env.EscapeEnv(database),
+		env.EscapeEnv(user),
 	))
 
 	// Capture standard output and error
@@ -189,7 +184,7 @@ func main() {
 
 			configureMariaDB(rootPass, user, pass, dbName)
 
-			cmd_stop := exec.Command("mariadb-admin", "-uroot", "-p"+escapePassword(rootPass), "shutdown")
+			cmd_stop := exec.Command("mariadb-admin", "-uroot", "-p"+env.EscapeEnv(rootPass), "shutdown")
 			cmd_stop.Stdout = os.Stdout
 			cmd_stop.Stderr = os.Stderr
 			if err := cmd_stop.Run(); err != nil {

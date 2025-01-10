@@ -35,6 +35,8 @@ services:
     networks:
       - inception
     environment:
+      - PHP_MEMORY_LIMIT="512M"
+      - PHP_MAX_UPLOAD="50M"
       - TZ=Europe/Paris
     volumes:
       - wp-site:/var/www/html
