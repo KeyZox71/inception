@@ -1,4 +1,5 @@
-FROM			alpine:3.21
+FROM			scratch
+ADD				docker/alpine/alpine-minirootfs-3.21.2-x86_64.tar.gz /
 
 LABEL			version="0.1"
 LABEL			maintainer="KeyZox"

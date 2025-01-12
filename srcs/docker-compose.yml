@@ -28,7 +28,7 @@ services:
     restart: unless-stopped
 
   wordpress-php:
-    container_name: inception-workp-php
+    container_name: inception-wordp-php
     build:
       context: .
       dockerfile: docker/wordpress/dockerfile
