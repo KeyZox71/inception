@@ -18,13 +18,13 @@ build-cms:
 	docker build -f $(DOCKERFILE_CMS) -t $(CMS_NAME) $(DOCKER_CONTEXT)
 
 start-db:
-	docker compose -f $(DOCKER_CONTEXT)/docker-compose.yml up db --build 
+	docker compose -f $(DOCKER_CONTEXT)docker-compose.yml up db --build 
 
 start-nginx:
-	docker compose -f $(DOCKER_CONTEXT)/docker-compose.yml up nginx --build 
+	docker compose -f $(DOCKER_CONTEXT)docker-compose.yml up nginx --build 
 
 start-wordp:
-	docker compose -f $(DOCKER_CONTEXT)/docker-compose.yml up wordpress-php --build 
+	docker compose -f $(DOCKER_CONTEXT)docker-compose.yml up wordpress-php --build 
 
 clean-db:
 	docker stop inception-db
@@ -32,8 +32,15 @@ clean-db:
 	docker volume rm inception_wp-db
 	docker image rm inception-db
 
+clean-wordp:
+	docker stop inception-wordp-php
+	docker container rm inception-wordp-php
+	docker volume rm inception_wp-site
+	docker image rm inception-wordpress-php
+
 clean-nginx:
 	docker stop inception-nginx
 	docker container rm inception-nginx
+	docker image rm inception-nginx
 
 .PHONY: cms-build db-build websrv-build clean-db clean-nginx

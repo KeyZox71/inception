@@ -31,17 +31,16 @@ services:
     container_name: inception-wordp-php
     build:
       context: .
-      dockerfile: docker/wordpress/dockerfile
+      dockerfile: docker/wordpress/Dockerfile
     networks:
       - inception
     environment:
       - PHP_MEMORY_LIMIT="512M"
       - PHP_MAX_UPLOAD="50M"
+      - PHP_PORT=9000
       - TZ=Europe/Paris
     volumes:
       - wp-site:/var/www/html
-    depends_on:
-      - db
     restart: unless-stopped
 
   db:

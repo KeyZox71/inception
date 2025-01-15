@@ -149,7 +149,6 @@ func configureMariaDB(rootPassword, user, password, database string) {
 func main() {
 	args := os.Args
 
-
 	if args[1] == "mariadbd" || args[1] == "mysqld" {
 		_log.Log("note", "Entrypoint script for MariaDB Server started")
 
