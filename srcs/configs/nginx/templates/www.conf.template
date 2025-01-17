@@ -1,0 +1,26 @@
+server {
+    listen				443 ssl;
+
+    server_name			adjoly.42.fr www.adjoly.42.fr;
+	
+    root				/var/www/html/;
+    index				index.php;
+
+    ssl_certificate     $NGINX_SSL_CERT_FILE;
+    ssl_certificate_key $NGINX_SSL_KEY_FILE;
+    ssl_protocols       TLSv1.2 TLSv1.3;
+    ssl_session_timeout 10m;
+
+    keepalive_timeout	60;
+
+    location / {
+		try_files $uri $uri/ =404;
+	}
+
+    location ~ \.php$ {
+        include					fastcgi.conf;
+		fastcgi_pass			$NGINX_PHP_HOST:9000;
+		fastcgi_index			index.php;
+		fastcgi_split_path_info	^(.+\.php)(/.+)$;
+    }
+}

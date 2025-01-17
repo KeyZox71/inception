@@ -13,18 +13,26 @@ services:
     container_name: inception-nginx
     build:
       context: .
-      dockerfile: docker/nginx/dockerfile
+      dockerfile: docker/nginx/Dockerfile
     networks:
       - inception
     environment:
       - TZ=Europe/Paris
+      - NGINX_PHP_HOST=inception-wordp-php
+      - NGINX_SSL_KEY_FILE=/etc/nginx/ssl/adjoly-wp.key
+      - NGINX_SSL_CERT_FILE=/etc/nginx/ssl/adjoly-wp.crt
     depends_on:
-      - wordpress-php
-      - db
+      wordpress-php:
+        condition: service_started
+      db:
+        condition: service_started
     volumes:
       - wp-site:/var/www/html
+      - ./configs/nginx/templates:/etc/nginx/templates
+      - ./configs/nginx/entry:/docker-entrypoint.d
     ports:
-      - "443:443"
+      - "8443:443"
+      - "8080:80"
     restart: unless-stopped
 
   wordpress-php:
@@ -34,6 +42,9 @@ services:
       dockerfile: docker/wordpress/Dockerfile
     networks:
       - inception
+    depends_on:
+      db:
+        condition: service_started
     environment:
       - PHP_MEMORY_LIMIT="512M"
       - PHP_MAX_UPLOAD="50M"

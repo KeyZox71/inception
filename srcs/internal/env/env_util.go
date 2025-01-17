@@ -7,7 +7,8 @@ import (
 	"git.keyzox.me/42_adjoly/inception/internal/log"
 )
 
-func	FileEnv(Value string, Default string) string {
+// Check if the "Value" exist in the env if not check if a "Value_FILE" exist and if still not just return default value
+func	FileEnv(Value, Default string) string {
 	val, is := os.LookupEnv(Value)
 
 	if is {
@@ -25,6 +26,7 @@ func	FileEnv(Value string, Default string) string {
 	return Default
 }
 
+// Check if the "Value" exist in the env check if not just return default value
 func	EnvCheck(Value, Default string) string {
 	val, is := os.LookupEnv(Value)
 
@@ -37,7 +39,7 @@ func	EnvCheck(Value, Default string) string {
 func EscapeEnv(str string) string {
 	if str[0] == '"' && str[len(str) - 1] == '"' {
 		return strings.TrimPrefix(strings.TrimSuffix(str, "\""), "\"")
-	} else if str[0] == '"' && str[len(str) - 1] == '"' {
+	} else if str[0] == '\'' && str[len(str) - 1] == '\'' {
 		return strings.TrimPrefix(strings.TrimSuffix(str, "'"), "'")
 	} else {
 		return str

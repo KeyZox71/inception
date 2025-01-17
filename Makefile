@@ -8,6 +8,9 @@ DOCKERFILE_DB := $(DOCKER_CONTEXT)$(DOCKER_FOLDER)/$(DB_SERVER_NAME)/Dockerfile
 DOCKERFILE_WEVSRV := $(DOCKER_CONTEXT)$(DOCKER_FOLDER)/$(WEB_SERVER_NAME)/Dockerfile
 DOCKERFILE_CMS := $(DOCKER_CONTEXT)$(DOCKER_FOLDER)/$(CMS_NAME)/Dockerfile
 
+all:
+	docker compose -f $(DOCKER_CONTEXT)docker-compose.yml up -d --build
+
 build-db:
 	docker build -f $(DOCKERFILE_DB) -t $(DB_SERVER_NAME) $(DOCKER_CONTEXT)
 
@@ -26,6 +29,15 @@ start-nginx:
 start-wordp:
 	docker compose -f $(DOCKER_CONTEXT)docker-compose.yml up wordpress-php --build 
 
+stop:
+	docker compose -f $(DOCKER_CONTEXT)docker-compose.yml stop
+
+clean: stop
+	docker system prune
+
+fclean: clean
+	docker system prune -a
+
 clean-db:
 	docker stop inception-db
 	docker container rm inception-db
@@ -42,5 +54,7 @@ clean-nginx:
 	docker stop inception-nginx
 	docker container rm inception-nginx
 	docker image rm inception-nginx
+
+re: clean all
 
 .PHONY: cms-build db-build websrv-build clean-db clean-nginx
