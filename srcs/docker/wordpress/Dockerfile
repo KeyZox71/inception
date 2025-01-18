@@ -12,7 +12,7 @@ COPY			cmd /build/cmd
 COPY			internal /build/internal
 COPY			docker/wordpress/www-docker.conf /www-docker.conf
 
-RUN				apk add --no-cache go curl php84-fpm tzdata fcgi \
+RUN				apk add --no-cache go curl php84-mysqli php84-fpm tzdata fcgi \
 				&& cd /build \
 				&& go build git.keyzox.me/42_adjoly/inception/cmd/wordpress/entrypoint \
 				&& cp /build/entrypoint /docker-entrypoint \

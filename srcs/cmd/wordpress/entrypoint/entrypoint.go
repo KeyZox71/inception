@@ -50,18 +50,18 @@ func main() {
 
 		makeFpmConf()
 
-		_, err := os.ReadFile("/usr/src/wordpress/wp-config.php")
+		_, err := os.ReadFile("/var/www/html/wp-config.php")
 
 		if err != nil && env.IsEnvSet("WORDPRESS_") {
-			content, err := os.ReadFile("/usr/src/wordpress/wp-config-docker.php")
+			content, err := os.ReadFile("/var/www/html/wp-config-docker.php")
 			if err != nil {
 				log.Fatal(err)
 			}
 			res := bytes.Replace([]byte(content), []byte("put your unique phrase here"), []byte(pass.GenStrPass(32)), -1)
-			if err := os.WriteFile("/usr/src/wordpress/wp-config.php", res, 0660); err != nil {
+			if err := os.WriteFile("/var/www/html/wp-config.php", res, 0660); err != nil {
 				log.Fatal(err)
 			}
-			cmd := exec.Command("chown", "www-data:www-data", "/usr/src/wordpress/wp-config.php")
+			cmd := exec.Command("chown", "www-data:www-data", "/var/www/html/wp-config.php")
 			cmd.Stdout = os.Stdout
 			cmd.Stderr = os.Stderr
 			if err := cmd.Run(); err == nil {
