@@ -21,18 +21,29 @@ services:
       - NGINX_PHP_HOST=inception-wordp-php
       - NGINX_SSL_KEY_FILE=/etc/nginx/ssl/adjoly-wp.key
       - NGINX_SSL_CERT_FILE=/etc/nginx/ssl/adjoly-wp.crt
+      - NGINX_EXPOSED_HOSTS=adjoly.42.fr
     depends_on:
       wordpress-php:
-        condition: service_started
+        condition: service_healthy
       db:
-        condition: service_started
+        condition: service_healthy
     volumes:
       - wp-site:/var/www/html
       - ./configs/nginx/templates:/etc/nginx/templates
       - ./configs/nginx/entry:/docker-entrypoint.d
     ports:
-      - "443:443"
+      - "10443:443"
     restart: unless-stopped
+    labels:
+      - traefik.enable=true
+      - traefik.docker.network=traefik-back
+      
+      - traefik.http.routers.inception.rule=Host(`inception.kanel.ovh`)
+      - traefik.http.routers.inception.entrypoints=websecure
+      - traefik.http.routers.inception.tls=true
+      - traefik.http.routers.inception.tls.certresolver=letsencrypt
+      - traefik.http.routers.inception.service=inception
+      - traefik.http.services.inception.loadbalancer.server.port=80
 
   wordpress-php:
     container_name: inception-wordp-php
@@ -43,7 +54,7 @@ services:
       - inception
     depends_on:
       db:
-        condition: service_started
+        condition: service_healthy
     environment:
       - PHP_MEMORY_LIMIT="512M"
       - PHP_MAX_UPLOAD="50M"
