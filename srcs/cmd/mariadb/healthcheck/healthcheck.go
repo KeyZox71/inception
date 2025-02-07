@@ -18,7 +18,7 @@ func checkMariaDB(user, password, host, port string) bool {
 		fmt.Printf("Health check failed: %v\n", err)
 		return false
 	}
-	fmt.Println("MariaDB is healthy")
+	fmt.Println("Maria	DB is healthy")
 	return true
 }
 

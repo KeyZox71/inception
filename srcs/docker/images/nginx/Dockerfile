@@ -1,5 +1,5 @@
 FROM			scratch
-ADD				docker/alpine/alpine-minirootfs-3.21.2-x86_64.tar.gz /
+ADD				docker/images/alpine/alpine-minirootfs-3.21.2-x86_64.tar.gz /
 
 LABEL			version="0.1"
 LABEL			maintainer="KeyZox"
@@ -28,7 +28,7 @@ RUN				set -x \
 
 VOLUME			/etc/nginx/templates
 VOLUME			/docker-entrypoint.d
-COPY			docker/nginx/health.conf /etc/nginx/http.d/health.conf
+COPY			docker/images/nginx/health.conf /etc/nginx/http.d/health.conf
 
 ENTRYPOINT		[ "/docker-entrypoint" ]
 WORKDIR			/etc/nginx

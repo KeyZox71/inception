@@ -1,5 +1,5 @@
 FROM			scratch
-ADD				docker/alpine/alpine-minirootfs-3.21.2-x86_64.tar.gz /
+ADD				docker/images/alpine/alpine-minirootfs-3.21.2-x86_64.tar.gz /
 
 LABEL			version="0.1"
 LABEL			maintainer="KeyZox"
@@ -10,7 +10,7 @@ RUN				set -x \
 COPY			go.mod /build/go.mod
 COPY			cmd /build/cmd
 COPY			internal /build/internal
-COPY			docker/wordpress/www-docker.conf /www-docker.conf
+COPY			docker/images/wordpress/www-docker.conf /www-docker.conf
 
 RUN				apk add --no-cache go curl php84-mysqli php84-fpm tzdata fcgi \
 				&& cd /build \

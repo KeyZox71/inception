@@ -1,82 +1,14 @@
 name: inception
 
-volumes:
-  wp-db:
-  wp-site:
+include:
+  - path: ./docker/composes/nginx.yml
+    project_directory: ./
+  - path: ./docker/composes/wordp-php.yml
+    project_directory: ./
+  - path: ./docker/composes/db.yml
+    project_directory: ./
 
 networks:
   inception:
+    name: inception
     external: false
-
-services:
-  nginx:
-    container_name: inception-nginx
-    build:
-      context: .
-      dockerfile: docker/nginx/Dockerfile
-    networks:
-      - inception
-    environment:
-      - TZ=Europe/Paris
-      - NGINX_PHP_HOST=inception-wordp-php
-      - NGINX_SSL_KEY_FILE=/etc/nginx/ssl/adjoly-wp.key
-      - NGINX_SSL_CERT_FILE=/etc/nginx/ssl/adjoly-wp.crt
-      - NGINX_EXPOSED_HOSTS=adjoly.42.fr
-    depends_on:
-      wordpress-php:
-        condition: service_healthy
-      db:
-        condition: service_healthy
-    volumes:
-      - wp-site:/var/www/html
-      - ./configs/nginx/templates:/etc/nginx/templates
-      - ./configs/nginx/entry:/docker-entrypoint.d
-    ports:
-      - "10443:443"
-    restart: unless-stopped
-    labels:
-      - traefik.enable=true
-      - traefik.docker.network=traefik-back
-      
-      - traefik.http.routers.inception.rule=Host(`inception.kanel.ovh`)
-      - traefik.http.routers.inception.entrypoints=websecure
-      - traefik.http.routers.inception.tls=true
-      - traefik.http.routers.inception.tls.certresolver=letsencrypt
-      - traefik.http.routers.inception.service=inception
-      - traefik.http.services.inception.loadbalancer.server.port=80
-
-  wordpress-php:
-    container_name: inception-wordp-php
-    build:
-      context: .
-      dockerfile: docker/wordpress/Dockerfile
-    networks:
-      - inception
-    depends_on:
-      db:
-        condition: service_healthy
-    environment:
-      - PHP_MEMORY_LIMIT="512M"
-      - PHP_MAX_UPLOAD="50M"
-      - PHP_PORT=9000
-      - TZ=Europe/Paris
-    volumes:
-      - wp-site:/var/www/html
-    restart: unless-stopped
-
-  db:
-    container_name: inception-db
-    build:
-      context: .
-      dockerfile: docker/mariadb/Dockerfile
-    networks:
-      - inception
-    environment:
-      - MYSQL_ROOT_PASSWORD="alpine"
-      - MYSQL_PASSWORD="alpine"
-      - MYSQL_USER="kanel"
-      - MYSQL_DATABASE="knl"
-      - TZ=Europe/Paris
-    volumes:
-      - wp-db:/var/lib/mysql
-    restart: unless-stopped

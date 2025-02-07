@@ -1,0 +1,20 @@
+volumes:
+  wp-db:
+
+services:
+  db:
+    container_name: inception-db
+    build:
+      context: .
+      dockerfile: docker/images/mariadb/Dockerfile
+    networks:
+      - inception
+    environment:
+      - MYSQL_ROOT_PASSWORD="alpine"
+      - MYSQL_PASSWORD="alpine"
+      - MYSQL_USER="kanel"
+      - MYSQL_DATABASE="knl"
+      - TZ=Europe/Paris
+    volumes:
+      - wp-db:/var/lib/mysql
+    restart: unless-stopped

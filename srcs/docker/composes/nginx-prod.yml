@@ -1,0 +1,11 @@
+
+    labels:
+      - traefik.enable=true
+      - traefik.docker.network=traefik-back
+      
+      - traefik.http.routers.inception.rule=Host(`inception.kanel.ovh`)
+      - traefik.http.routers.inception.entrypoints=websecure
+      - traefik.http.routers.inception.tls=true
+      - traefik.http.routers.inception.tls.certresolver=letsencrypt
+      - traefik.http.routers.inception.service=inception
+      - traefik.http.services.inception.loadbalancer.server.port=80
