@@ -7,6 +7,12 @@ include:
     project_directory: ./
   - path: ./docker/composes/db.yml
     project_directory: ./
+  - path: ./docker/composes/dev/nginx.yml
+    project_directory: ./
+  - path: ./docker/composes/dev/wordp-php.yml
+    project_directory: ./
+  - path: ./docker/composes/dev/db.yml
+    project_directory: ./
 
 networks:
   inception:

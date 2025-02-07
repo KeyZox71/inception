@@ -1,8 +1,5 @@
-volumes:
-  wp-db:
-
 services:
-  db:
+  db-dev:
     container_name: inception-db
     build:
       context: .
@@ -19,4 +16,4 @@ services:
       - wp-db:/var/lib/mysql
     restart: unless-stopped
     profiles:
-      - correction
+      - dev

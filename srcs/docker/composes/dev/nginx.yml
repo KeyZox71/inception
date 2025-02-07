@@ -1,22 +1,5 @@
-volumes:
-  nginx-templates:
-    name: nginx-templates
-    driver: local
-    driver_opts:
-      device: $HOME/data/nginx/templates
-      o: "bind,ro"
-      type: none
-  nginx-entry:
-    name: nginx-entry
-    driver: local
-    driver_opts:
-      device: $HOME/data/nginx/entry
-      o: "bind,ro"
-      type: none
-  
-
 services:
-  nginx:
+  nginx-dev:
     container_name: inception-nginx
     build:
       context: .
@@ -28,18 +11,17 @@ services:
       - NGINX_PHP_HOST=inception-wordp-php
       - NGINX_SSL_KEY_FILE=/etc/nginx/ssl/adjoly-wp.key
       - NGINX_SSL_CERT_FILE=/etc/nginx/ssl/adjoly-wp.crt
-      - NGINX_EXPOSED_HOSTS=adjoly.42.fr
     depends_on:
-      wordpress-php:
+      wordpress-php-dev:
         condition: service_healthy
-      db:
+      db-dev:
         condition: service_healthy
     volumes:
       - wp-site:/var/www/html
-      - nginx-templates:/etc/nginx/templates
-      - nginx-entry:/docker-entrypoint.d
+      - ./configs/nginx/templates-dev:/etc/nginx/templates
+      - ./configs/nginx/entry:/docker-entrypoint.d
     ports:
-      - "10443:443"
+      - "443:443"
     restart: unless-stopped
     profiles:
-      - correction
+      - dev

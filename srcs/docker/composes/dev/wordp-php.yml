@@ -2,7 +2,7 @@ volumes:
   wp-site:
 
 services:
-  wordpress-php:
+  wordpress-php-dev:
     container_name: inception-wordp-php
     build:
       context: .
@@ -10,7 +10,7 @@ services:
     networks:
       - inception
     depends_on:
-      db:
+      db-dev:
         condition: service_healthy
     environment:
       - PHP_MEMORY_LIMIT="512M"
@@ -21,4 +21,4 @@ services:
       - wp-site:/var/www/html
     restart: unless-stopped
     profiles:
-      - correction
+      - dev
