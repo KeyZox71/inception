@@ -11,6 +11,7 @@ COPY			go.mod /build/go.mod
 COPY			cmd /build/cmd
 COPY			internal /build/internal
 COPY			docker/wordpress/www-docker.conf /www-docker.conf
+COPY			docker/wordpress/wp-config-docker.php /usr/src/wordpress/wp-config-docker.php
 
 RUN				apk add --no-cache go curl php84-mysqli php84-fpm tzdata fcgi \
 				&& cd /build \
