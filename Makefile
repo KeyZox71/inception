@@ -33,10 +33,11 @@ stop:
 	docker compose -f $(DOCKER_CONTEXT)docker-compose.yml stop
 
 clean: stop
-	docker system prune
+	docker system prune -f
 
 fclean: clean
-	docker system prune -a
+	docker system prune -af
+	docker volume prune -af
 
 clean-db:
 	docker stop inception-db

@@ -123,7 +123,7 @@ func configureMariaDB(rootPassword, user, password, database string) {
 		CREATE DATABASE IF NOT EXISTS %s;
 		CREATE USER IF NOT EXISTS '%s'@'%%';
 		GRANT ALL PRIVILEGES ON %s.* TO '%s'@'localhost' IDENTIFIED BY '%s';
-		GRANT ALL PRIVILEGES ON %s.* TO '%s'@'%%';
+		GRANT ALL PRIVILEGES ON %s.* TO '%s'@'%%' IDENTIFIED BY '%s';
 		FLUSH PRIVILEGES;
 	`,
 		env.EscapeEnv(rootPassword),
@@ -134,6 +134,7 @@ func configureMariaDB(rootPassword, user, password, database string) {
 		env.EscapeEnv(password),
 		env.EscapeEnv(database),
 		env.EscapeEnv(user),
+		env.EscapeEnv(password),
 	))
 
 	// Capture standard output and error

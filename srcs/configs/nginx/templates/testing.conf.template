@@ -1,7 +1,7 @@
 server {
-    listen				443 ssl;
+    listen				8443 ssl;
 
-    server_name			adjoly.42.fr www.adjoly.42.fr;
+    server_name			_;
 	
     root				/var/www/wordpress;
     index				index.php;

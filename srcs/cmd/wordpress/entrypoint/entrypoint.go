@@ -49,25 +49,24 @@ func main() {
 
 		makeFpmConf()
 
-		_, err := os.ReadFile("/usr/src/wordpress/wp-config.php")
+		_, err := os.ReadFile("/var/www/wordpress/wp-config.php")
 
 		if err != nil {
 			_log.Log("note", "Configuring wordpress...")
-			content, err := os.ReadFile("/usr/src/wordpress/wp-config-docker.php")
+			content, err := os.ReadFile("/var/www/wordpress/wp-config-docker.php")
 			if err != nil {
 				log.Fatal(err)
 			}
 			res := bytes.Replace([]byte(content), []byte("put your unique phrase here"), []byte(pass.GenStrPass(32)), -1)
-			if err := os.WriteFile("/usr/src/wordpress/wp-config.php", res, 0660); err != nil {
+			if err := os.WriteFile("/var/www/wordpress/wp-config.php", res, 0660); err != nil {
 				log.Fatal(err)
 			}
-			cmd := exec.Command("chown", "www-data:www-data", "/usr/src/wordpress/wp-config.php")
+			cmd := exec.Command("chown", "www-data:www-data", "/var/www/wordpress/wp-config.php")
 			cmd.Stdout = os.Stdout
 			cmd.Stderr = os.Stderr
 			if err := cmd.Run(); err != nil {
 				log.Fatal(err)
 			}
-			_log.Log("note", "wp configured")
 		}
 	}
 
@@ -75,6 +74,7 @@ func main() {
 	cmd := exec.Command(args[1], args[2:]...)
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
+	cmd.Env = os.Environ()
 	cmd.Stdin = os.Stdin
 	if err := cmd.Run(); err != nil {
 		fmt.Printf("Error running MariaDB: %v\n", err)

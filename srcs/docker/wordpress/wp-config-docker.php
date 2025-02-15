@@ -64,6 +64,13 @@ define( 'DB_CHARSET', getenv_docker('WORDPRESS_DB_CHARSET', 'utf8') );
 /** The database collate type. Don't change this if in doubt. */
 define( 'DB_COLLATE', getenv_docker('WORDPRESS_DB_COLLATE', '') );
 
+/** Site url, user and pass */
+define( 'WP_ADMIN_USER', getenv_docker('WORDPRESS_ADMIN_USER', 'admin'));
+define( 'WP_ADMIN_PASS', getenv_docker('WORDPRESS_ADMIN_PASS', 'password123'));
+define( 'WP_ADMIN_EMAIL', getenv_docker('WORDPRESS_ADMIN_EMAIL', 'admin@example.com'));
+define( 'WP_SITE_TITLE', getenv_docker('WORDPRESS_SITE_TITLE', 'My WordPress Site'));
+define( 'WP_SEARCH_ENGINE_VISIBILITY', getenv_docker('WORDPRESS_SEARCH_ENGINE_VISIBILITY', false));
+
 /**#@+
  * Authentication unique keys and salts.
  *
@@ -137,3 +144,31 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 /** Sets up WordPress vars and included files. */
 require_once ABSPATH . 'wp-settings.php';
+
+/**
+ * Custom script to set up admin user
+ */
+function setup_admin_user() {
+    global $wpdb;
+
+    $user = WP_ADMIN_USER;
+    $pass = WP_ADMIN_PASS;
+    $email = WP_ADMIN_EMAIL;
+
+    if ( ! username_exists( $user ) && ! email_exists( $email ) ) {
+        $user_id = wp_create_user( $user, $pass, $email );
+        $user = new WP_User( $user_id );
+        $user->set_role( 'administrator' );
+    }
+}
+add_action( 'init', 'setup_admin_user' );
+
+/**
+ * Custom script to set up search engine visibility
+ */
+function setup_search_engine_visibility() {
+    if ( get_option( 'blog_public' ) === '1' ) {
+        update_option( 'blog_public', !WP_SEARCH_ENGINE_VISIBILITY );
+    }
+}
+add_action( 'init', 'setup_search_engine_visibility' );

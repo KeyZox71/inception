@@ -23,15 +23,15 @@ services:
       - NGINX_SSL_CERT_FILE=/etc/nginx/ssl/adjoly-wp.crt
     depends_on:
       wordpress-php:
-        condition: service_started
+        condition: service_healthy
       db:
-        condition: service_started
+        condition: service_healthy
     volumes:
-      - wp-site:/var/www/html
+      - wp-site:/var/www/wordpress
       - ./configs/nginx/templates:/etc/nginx/templates
       - ./configs/nginx/entry:/docker-entrypoint.d
     ports:
-      - "443:443"
+      - "8443:8443"
     restart: unless-stopped
 
   wordpress-php:
@@ -43,14 +43,23 @@ services:
       - inception
     depends_on:
       db:
-        condition: service_started
+        condition: service_healthy
     environment:
+      - WORDPRESS_DB_NAME=knl
+      - WORDPRESS_DB_USER=kanel
+      - WORDPRESS_DB_PASSWORD=alpine
+      - WORDPRESS_DB_HOST=db
+      - WORDPRESS_ADMIN_EMAIL=contact@kanel.ovh
+      - WORDPRESS_ADMIN_USER=kanel
+      - WORDPRESS_ADMIN_PASS=alpine
+      - WORDPRESS_SITE_TITLE='Kanel supremacy'
+      - WORDPRESS_SEARCH_ENGINE_VISIBILITY=false
       - PHP_MEMORY_LIMIT="512M"
       - PHP_MAX_UPLOAD="50M"
       - PHP_PORT=9000
       - TZ=Europe/Paris
     volumes:
-      - wp-site:/var/www/html
+      - wp-site:/var/www/wordpress
     restart: unless-stopped
 
   db:

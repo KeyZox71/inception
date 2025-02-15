@@ -11,7 +11,7 @@ COPY			go.mod /build/go.mod
 COPY			cmd /build/cmd
 COPY			internal /build/internal
 COPY			docker/wordpress/www-docker.conf /www-docker.conf
-COPY			docker/wordpress/wp-config-docker.php /usr/src/wordpress/wp-config-docker.php
+COPY			docker/wordpress/wp-config-docker.php /var/www/wordpress/wp-config-docker.php
 
 RUN				apk add --no-cache go curl php84-mysqli php84-fpm tzdata fcgi \
 				&& cd /build \
@@ -22,9 +22,9 @@ RUN				apk add --no-cache go curl php84-mysqli php84-fpm tzdata fcgi \
 				&& rm -Rf /build \ 
 				&& mkdir -p /usr/src/wordpress
 
-VOLUME			/usr/src/wordpress
+VOLUME			/var/www/wordpress
 
-WORKDIR			/usr/src
+WORKDIR			/var/www
 
 RUN				version='6.7.1' \
 				&& curl -o wordpress.tar.gz -fL "https://wordpress.org/wordpress-$version.tar.gz" \
@@ -32,17 +32,17 @@ RUN				version='6.7.1' \
 				&& rm -rf /var/cache/apk/* \
 				&& tar -xzvf wordpress.tar.gz \
 				&& rm wordpress.tar.gz \
-				&& chown -R www-data:www-data /usr/src/wordpress \
+				&& chown -R www-data:www-data /var/www/wordpress \
 				&& mkdir wp-content \
-				&& for dir in /usr/src/wordpress/wp-content/*/ cache; do \
+				&& for dir in /var/www/wp-content/*/ cache; do \
 					dir="$(basename "${dir%/}")"; \
 					mkdir "wp-content/$dir"; \
 				done \
-				&& chown -R www-data:www-data wp-content \
-				&& chmod -R 1777 wp-content
+				&& chown -R www-data:www-data /var/www/wordpress/wp-content \
+				&& chmod -R 1777 /var/www/wordpress/wp-content
 
 ENTRYPOINT		[ "/docker-entrypoint" ]
-WORKDIR			/usr/src/wordpress
+WORKDIR			/var/www/wordpress
 STOPSIGNAL		SIGQUIT
 
 EXPOSE			9000
