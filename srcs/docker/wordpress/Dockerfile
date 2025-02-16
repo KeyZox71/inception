@@ -11,22 +11,33 @@ COPY			go.mod /build/go.mod
 COPY			cmd /build/cmd
 COPY			internal /build/internal
 COPY			docker/wordpress/www-docker.conf /www-docker.conf
-COPY			docker/wordpress/wp-config-docker.php /var/www/wordpress/wp-config-docker.php
 
-RUN				apk add --no-cache go curl php84-mysqli php84-fpm tzdata fcgi \
+RUN				apk add --no-cache go curl tzdata fcgi \
+				php84-phar php84-xml php84-curl php84-zip \
+				php84-intl php84-mbstring php84-iconv \
+				php84 php84-mysqli php84-fpm php84-json \
+				php84-zlib php84-session php84-dom \
+				php84-xmlreader php84-pdo php84-gd \
+				php84-opcache php84-ctype \
 				&& cd /build \
+				&& curl -O https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar \
+				&& chmod +x wp-cli.phar \
+				&& mv wp-cli.phar /usr/local/bin/wp \
 				&& go build git.keyzox.me/42_adjoly/inception/cmd/wordpress/entrypoint \
 				&& cp /build/entrypoint /docker-entrypoint \
 				&& chmod +x /docker-entrypoint \
 				&& apk del go \
 				&& rm -Rf /build \ 
-				&& mkdir -p /usr/src/wordpress
+				&& mkdir /docker-entrypoint.d
+
+RUN				cp /usr/bin/php84 /usr/bin/php
 
 VOLUME			/var/www/wordpress
+VOLUME			/docker-entrypoint.d
 
 WORKDIR			/var/www
 
-RUN				version='6.7.1' \
+RUN				version='6.7.2' \
 				&& curl -o wordpress.tar.gz -fL "https://wordpress.org/wordpress-$version.tar.gz" \
 				&& apk del curl \
 				&& rm -rf /var/cache/apk/* \

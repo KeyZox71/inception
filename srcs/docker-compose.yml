@@ -45,21 +45,23 @@ services:
       db:
         condition: service_healthy
     environment:
-      - WORDPRESS_DB_NAME=knl
-      - WORDPRESS_DB_USER=kanel
-      - WORDPRESS_DB_PASSWORD=alpine
-      - WORDPRESS_DB_HOST=db
-      - WORDPRESS_ADMIN_EMAIL=contact@kanel.ovh
-      - WORDPRESS_ADMIN_USER=kanel
-      - WORDPRESS_ADMIN_PASS=alpine
-      - WORDPRESS_SITE_TITLE='Kanel supremacy'
-      - WORDPRESS_SEARCH_ENGINE_VISIBILITY=false
+      - WP_DB_NAME=knl
+      - WP_DB_USER=kanel
+      - WP_DB_PASS=alpine
+      - WP_DB_HOST=db
+      - WP_ADMIN_EMAIL=contact@kanel.ovh
+      - WP_ADMIN_USER=kanel
+      - WP_ADMIN_PASS=alpine
+      - WP_URL=localhost:8443
+      - WP_TITLE=Kanel Supremacy
+      - WP_SEARCH_ENGINE_VISIBILITY=false
       - PHP_MEMORY_LIMIT="512M"
       - PHP_MAX_UPLOAD="50M"
       - PHP_PORT=9000
       - TZ=Europe/Paris
     volumes:
       - wp-site:/var/www/wordpress
+      - ./configs/wordpress/entry:/docker-entrypoint.d
     restart: unless-stopped
 
   db:

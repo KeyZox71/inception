@@ -9,7 +9,6 @@ import (
 	"os/exec"
 
 	"git.keyzox.me/42_adjoly/inception/internal/log"
-	"git.keyzox.me/42_adjoly/inception/internal/pass"
 )
 
 func makeFpmConf() {
@@ -49,25 +48,24 @@ func main() {
 
 		makeFpmConf()
 
-		_, err := os.ReadFile("/var/www/wordpress/wp-config.php")
-
+		dir, err := os.ReadDir("/docker-entrypoint.d")
 		if err != nil {
-			_log.Log("note", "Configuring wordpress...")
-			content, err := os.ReadFile("/var/www/wordpress/wp-config-docker.php")
-			if err != nil {
-				log.Fatal(err)
-			}
-			res := bytes.Replace([]byte(content), []byte("put your unique phrase here"), []byte(pass.GenStrPass(32)), -1)
-			if err := os.WriteFile("/var/www/wordpress/wp-config.php", res, 0660); err != nil {
-				log.Fatal(err)
-			}
-			cmd := exec.Command("chown", "www-data:www-data", "/var/www/wordpress/wp-config.php")
+			log.Fatal(err)
+		}
+		_log.Log("note", "Running entrypoint scripts...")
+		for _, v := range dir {
+			os.Chmod("/docker-entrypoint.d/" + v.Name(), 0755)
+			cmd := exec.Command("/docker-entrypoint.d/" + v.Name())
+			cmd.Env = os.Environ()
 			cmd.Stdout = os.Stdout
 			cmd.Stderr = os.Stderr
+			cmd.Stdin = os.Stdin
 			if err := cmd.Run(); err != nil {
-				log.Fatal(err)
+				fmt.Printf("Error running script(%s): %v\n", v.Name(), err)
+				os.Exit(1)
 			}
 		}
+
 	}
 
 	_log.Log("note", "Starting container")

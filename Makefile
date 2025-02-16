@@ -56,6 +56,6 @@ clean-nginx:
 	docker container rm inception-nginx
 	docker image rm inception-nginx
 
-re: clean all
+re: fclean all
 
 .PHONY: cms-build db-build websrv-build clean-db clean-nginx
