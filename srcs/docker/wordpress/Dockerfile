@@ -58,4 +58,4 @@ STOPSIGNAL		SIGQUIT
 
 EXPOSE			9000
 CMD				[ "php-fpm84", "-F" ]
-HEALTHCHECK		--interval=30s --timeout=10s --retries=3 --start-period=1s --start-interval=2s  CMD cgi-fcgi -bind -connect 127.0.0.1:${PHP_PORT:-9000} || exit 1
+HEALTHCHECK		--interval=30s --timeout=10s --retries=3 --start-period=3s --start-interval=2s  CMD cgi-fcgi -bind -connect 127.0.0.1:${PHP_PORT:-9000} || exit 1

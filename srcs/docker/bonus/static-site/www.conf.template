@@ -1,0 +1,17 @@
+server {
+    listen				0.0.0.0:443 ssl;
+
+    root				/var/www/html;
+    index				index.html;
+
+    ssl_certificate     $NGINX_SSL_CERT_FILE;
+    ssl_certificate_key $NGINX_SSL_KEY_FILE;
+    ssl_protocols       TLSv1.2 TLSv1.3;
+    ssl_session_timeout 10m;
+
+    keepalive_timeout	60;
+
+    location / {
+		try_files $${q}uri $${q}uri/ =404;
+	}
+}

@@ -1,0 +1,11 @@
+services:
+  static-site:
+    build: static-site
+    ports:
+      - 8080:443
+    depends_on:
+      - nginx
+    environment:
+      - TZ=Europe/Paris
+      - NGINX_SSL_KEY_FILE=/etc/nginx/ssl/kanel-wp.key
+      - NGINX_SSL_CERT_FILE=/etc/nginx/ssl/kanel-wp.crt

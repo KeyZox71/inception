@@ -3,10 +3,14 @@ name: inception
 volumes:
   wp-db:
   wp-site:
+  nginx-certs:
 
 networks:
   inception:
     external: false
+
+include:
+  - docker/bonus/compose.yml
 
 services:
   nginx:
@@ -30,6 +34,7 @@ services:
       - wp-site:/var/www/wordpress
       - ./configs/nginx/templates:/etc/nginx/templates
       - ./configs/nginx/entry:/docker-entrypoint.d
+      - nginx-certs:/etc/nginx/ssl
     ports:
       - "8443:8443"
     restart: unless-stopped
