@@ -200,6 +200,7 @@ func main() {
 	}
 
 	cmd := exec.Command(args[1], args[2:]...)
+	cmd.Env = os.Environ()
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
 	cmd.Stdin = os.Stdin

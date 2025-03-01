@@ -70,9 +70,9 @@ func main() {
 
 	_log.Log("note", "Starting container")
 	cmd := exec.Command(args[1], args[2:]...)
+	cmd.Env = os.Environ()
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
-	cmd.Env = os.Environ()
 	cmd.Stdin = os.Stdin
 	if err := cmd.Run(); err != nil {
 		fmt.Printf("Error running MariaDB: %v\n", err)
