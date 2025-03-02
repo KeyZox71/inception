@@ -1,32 +1,39 @@
+FROM			scratch AS builder
+ADD				docker/alpine/alpine-minirootfs-3.21.2-x86_64.tar.gz /
+
+RUN				apk add go
+
+WORKDIR			/build
+
+COPY			go.mod /build/go.mod
+COPY			cmd /build/cmd
+COPY			internal /build/internal
+
+RUN				cd /build \
+				&& go build git.keyzox.me/42_adjoly/inception/cmd/wordpress/entrypoint
+
 FROM			scratch
 ADD				docker/alpine/alpine-minirootfs-3.21.2-x86_64.tar.gz /
 
 LABEL			version="0.1"
 LABEL			maintainer="KeyZox"
 
-RUN				set -x \
-				&& adduser -u 82 -D -S -G www-data www-data
-
-COPY			go.mod /build/go.mod
-COPY			cmd /build/cmd
-COPY			internal /build/internal
+COPY			--from=builder /build/entrypoint /docker-entrypoint
 COPY			docker/wordpress/www-docker.conf /www-docker.conf
 
-RUN				apk add --no-cache go curl tzdata fcgi \
+RUN				set -x \
+				&& adduser -u 82 -D -S -G www-data www-data \
+				&& apk add --no-cache curl tzdata fcgi \
 				php84-phar php84-xml php84-curl php84-zip \
 				php84-intl php84-mbstring php84-iconv \
 				php84 php84-mysqli php84-fpm php84-json \
 				php84-zlib php84-session php84-dom \
 				php84-xmlreader php84-pdo php84-gd \
 				php84-opcache php84-ctype \
-				&& cd /build \
 				&& curl -O https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar \
 				&& chmod +x wp-cli.phar \
 				&& mv wp-cli.phar /usr/local/bin/wp \
-				&& go build git.keyzox.me/42_adjoly/inception/cmd/wordpress/entrypoint \
-				&& cp /build/entrypoint /docker-entrypoint \
 				&& chmod +x /docker-entrypoint \
-				&& apk del go \
 				&& rm -Rf /build \ 
 				&& mkdir /docker-entrypoint.d
 

@@ -9,9 +9,6 @@ networks:
   inception:
     external: false
 
-include:
-  - docker/bonus/compose.yml
-
 services:
   nginx:
     container_name: inception-nginx
@@ -85,3 +82,33 @@ services:
     volumes:
       - wp-db:/var/lib/mysql
     restart: unless-stopped
+
+  ftp:
+    build:
+      context: .
+      dockerfile: docker/bonus/vsftpd/Dockerfile
+    ports:
+      - 2100:2100
+      - 30000-30100:30000-30100
+    volumes:
+      - wp-site:/var/ftp
+    environment:
+      - FTP_USER=kanel
+      - FTP_PASS=legoat
+    depends_on:
+      nginx:
+        condition: service_started
+      wordpress-php:
+        condition: service_healthy
+
+  static-site:
+    build: docker/bonus/static-site
+    ports:
+      - 8080:443
+    depends_on:
+      - nginx
+    environment:
+      - TZ=Europe/Paris
+      - NGINX_SSL_KEY_FILE=/etc/nginx/ssl/kanel-wp.key
+      - NGINX_SSL_CERT_FILE=/etc/nginx/ssl/kanel-wp.crt
+
