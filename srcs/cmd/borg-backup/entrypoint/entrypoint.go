@@ -1,16 +1,16 @@
 package main
 
 import (
+	"bufio"
 	"fmt"
 	"log"
 	"os"
 	"os/exec"
-	"bufio"
+	"slices"
 
 	"git.keyzox.me/42_adjoly/inception/internal/cmd"
 	"git.keyzox.me/42_adjoly/inception/internal/env"
 	_log "git.keyzox.me/42_adjoly/inception/internal/log"
-	"git.keyzox.me/42_adjoly/inception/internal/pass"
 )
 
 func overrideCronFile(filePath string, jobs []string) error {
@@ -70,13 +70,13 @@ func main() {
 			_log.Log("error", "No passphrase specified, exiting...")
 		}
 
-		err = cmd.ExecCmd([]string{"borg", "init", "--encryption=" + passphrase, repo})
+		err = cmd.ExecCmd([]string{"borg", "init", "--encryption=repokey-blake2", repo}, slices.Insert(os.Environ(), len(os.Environ()), "BORG_PASSPHRASE="+passphrase))
 		if err != nil {
 			log.Fatal(err)
 		}
 	}
 
-	interval := env.EnvCheck("CRON_INTERVAL", "0 0 * * *")
+	interval := env.EnvCheck("CRON_INTERVAL", "0 2 * * *")
 	cronFilePath := "/etc/crontabs/root"
 	newJobs := []string{
 		"# Borg Backup Cron Job",

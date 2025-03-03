@@ -4,6 +4,7 @@ volumes:
   wp-db:
   wp-site:
   nginx-certs:
+  backup:
 
 networks:
   inception:
@@ -103,15 +104,12 @@ services:
       - inception
     environment:
       - TZ=Europe/Paris # handled by tzdata
-      - CRON_INTERVAL=0 0 * * * # handled by entrypoint
+      - CRON_INTERVAL=0 2 * * * # handled by entrypoint
       - BORG_PASSPHRASE=Hanky-Kangaroo-Thinning5-Statute-Mascot-Islamist
-      - BORG_REPO=/backup
-      - BORG_SRC=/source
-      - BORG_COMPRESS=zstd
+      - BORG_COMPRESS=
       - BORG_PRUNE_KEEP_DAILY=3
       - BORG_PRUNE_KEEP_WEEKLY=2
       - BORG_PRUNE_KEEP_MONTHLY=1
-      #- BORG_EXCLUDE_PATTERNS=/var/www/cache # just an exemple to remove after
       - BORG_LOG_LEVEL=info
       - BORG_CHECK_LAST=3
       - BORG_CHECK_DATA=1
@@ -121,4 +119,5 @@ services:
     volumes:
       - wp-db:/source/db
       - wp-site:/source/wordpress
+      - backup:/backup
     restart: unless-stopped
