@@ -83,24 +83,6 @@ services:
       - wp-db:/var/lib/mysql
     restart: unless-stopped
 
-  ftp:
-    build:
-      context: .
-      dockerfile: docker/bonus/vsftpd/Dockerfile
-    ports:
-      - 2100:2100
-      - 30000-30100:30000-30100
-    volumes:
-      - wp-site:/var/ftp
-    environment:
-      - FTP_USER=kanel
-      - FTP_PASS=legoat
-    depends_on:
-      nginx:
-        condition: service_started
-      wordpress-php:
-        condition: service_healthy
-
   static-site:
     build: docker/bonus/static-site
     ports:
@@ -111,4 +93,32 @@ services:
       - TZ=Europe/Paris
       - NGINX_SSL_KEY_FILE=/etc/nginx/ssl/kanel-wp.key
       - NGINX_SSL_CERT_FILE=/etc/nginx/ssl/kanel-wp.crt
+    restart: unless-stopped
 
+  backup:
+    build:
+      context: .
+      dockerfile: docker/bonus/borg-backup/Dockerfile
+    networks:
+      - inception
+    environment:
+      - TZ=Europe/Paris # handled by tzdata
+      - CRON_INTERVAL=0 0 * * * # handled by entrypoint
+      - BORG_PASSPHRASE=Hanky-Kangaroo-Thinning5-Statute-Mascot-Islamist
+      - BORG_REPO=/backup
+      - BORG_SRC=/source
+      - BORG_COMPRESS=zstd
+      - BORG_PRUNE_KEEP_DAILY=3
+      - BORG_PRUNE_KEEP_WEEKLY=2
+      - BORG_PRUNE_KEEP_MONTHLY=1
+      #- BORG_EXCLUDE_PATTERNS=/var/www/cache # just an exemple to remove after
+      - BORG_LOG_LEVEL=info
+      - BORG_CHECK_LAST=3
+      - BORG_CHECK_DATA=1
+    depends_on:
+      nginx:
+        condition: service_healthy
+    volumes:
+      - wp-db:/source/db
+      - wp-site:/source/wordpress
+    restart: unless-stopped

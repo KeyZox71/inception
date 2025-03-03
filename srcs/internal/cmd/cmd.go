@@ -7,13 +7,11 @@ import (
 	_log "git.keyzox.me/42_adjoly/inception/internal/log"
 )
 
-func ExecCmd(cmdStr []string) {
+func ExecCmd(cmdStr []string) error {
 	cmd := exec.Command(cmdStr[0], cmdStr...)
 	cmd.Env = os.Environ()
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
 	cmd.Stdin = os.Stdin
-	if err := cmd.Run(); err != nil {
-		_log.Log("error", "Could not execute : " + cmdStr[0])
-	}
+	return cmd.Run()
 }

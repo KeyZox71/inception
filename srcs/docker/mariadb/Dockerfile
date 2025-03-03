@@ -25,16 +25,9 @@ RUN				addgroup mysql \
 COPY			--from=builder /build/entrypoint /docker-entrypoint
 COPY			--from=builder /build/healthcheck /docker-healthcheck
 
-RUN				mkdir /build
-
-COPY			go.mod /build/go.mod
-COPY			cmd /build/cmd
-COPY			internal /build/internal
-
-RUN				apk add --no-cache go mariadb tzdata mariadb-client \
+RUN				apk add --no-cache mariadb tzdata mariadb-client \
 				&& chmod +x /docker-healthcheck \
 				&& chmod +x /docker-entrypoint \
-				&& apk del go \
 				&& mkdir -p /etc/mysql/conf.d /etc/mysql/mariadb.conf.d/ /run/mariadb /run/mysqld \
 				&& chmod ugo+rwx,o+t /run/mariadb \
 				&& chown -R mysql:mysql /var/lib/mysql /run/mariadb /run/mysqld \
