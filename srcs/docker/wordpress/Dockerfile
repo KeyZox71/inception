@@ -29,7 +29,7 @@ RUN				set -x \
 				php84 php84-mysqli php84-fpm php84-json \
 				php84-zlib php84-session php84-dom \
 				php84-xmlreader php84-pdo php84-gd \
-				php84-opcache php84-ctype \
+				php84-opcache php84-ctype php84-tokenizer \
 				&& curl -O https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar \
 				&& chmod +x wp-cli.phar \
 				&& mv wp-cli.phar /usr/local/bin/wp \
@@ -65,4 +65,4 @@ STOPSIGNAL		SIGQUIT
 
 EXPOSE			9000
 CMD				[ "php-fpm84", "-F" ]
-HEALTHCHECK		--interval=30s --timeout=10s --retries=3 --start-period=3s --start-interval=2s  CMD cgi-fcgi -bind -connect 127.0.0.1:${PHP_PORT:-9000} || exit 1
+HEALTHCHECK		--interval=30s --timeout=10s --retries=3 --start-period=7s --start-interval=2s  CMD cgi-fcgi -bind -connect 127.0.0.1:${PHP_PORT:-9000} || exit 1

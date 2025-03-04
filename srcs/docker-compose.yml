@@ -61,6 +61,8 @@ services:
       - PHP_MEMORY_LIMIT="512M"
       - PHP_MAX_UPLOAD="50M"
       - PHP_PORT=9000
+      - REDIS_HOSTNAME=redis
+      - REDIS_PORT=6379
       - TZ=Europe/Paris
     volumes:
       - wp-site:/var/www/wordpress
@@ -86,6 +88,7 @@ services:
 
   static-site:
     build: docker/bonus/static-site
+    container_name: inception-kanel-supremacy
     ports:
       - 8080:443
     depends_on:
@@ -100,6 +103,7 @@ services:
     build:
       context: .
       dockerfile: docker/bonus/borg-backup/Dockerfile
+    container_name: inception-backup
     networks:
       - inception
     environment:
@@ -120,4 +124,44 @@ services:
       - wp-db:/source/db
       - wp-site:/source/wordpress
       - backup:/backup
+    restart: unless-stopped
+
+  adminer:
+    build:
+      context: .
+      dockerfile: docker/bonus/adminer/Dockerfile
+    container_name: inception-adminer
+    networks:
+      - inception
+    ports:
+      - 8090:8080
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: unless-stopped
+
+  redis:
+    build:
+      context: .
+      dockerfile: docker/bonus/redis/Dockerfile
+    container_name: inception-redis
+    networks:
+      - inception
+    restart: unless-stopped
+
+  ftp:
+    build:
+      context: .
+      dockerfile: docker/bonus/vsftpd/Dockerfile
+    container_name: inception-ftp
+    networks:
+      - inception
+    environment:
+      - VSFTPD_USER=kanel
+      - VSFTPD_PASS=alpine
+    volumes:
+      - wp-site:/var/ftp
+    ports:
+      - 21:21
+      - 30000-30100:30000-30100
     restart: unless-stopped

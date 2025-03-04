@@ -44,4 +44,4 @@ WORKDIR			/var/lib/mysql
 
 EXPOSE			3306
 CMD				[ "mariadbd", "--user=mysql" ]
-HEALTHCHECK		--interval=30s --timeout=10s --retries=3 --start-period=1s --start-interval=2s CMD /docker-healthcheck
+HEALTHCHECK		--interval=30s --timeout=10s --retries=3 --start-period=3s --start-interval=2s CMD /docker-healthcheck
