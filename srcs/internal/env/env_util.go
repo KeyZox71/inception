@@ -7,8 +7,14 @@ import (
 	"git.keyzox.me/42_adjoly/inception/internal/log"
 )
 
-func	removeNl(in string) string {
-
+func rmNewline(s string) string {
+	// Check if the string is not empty and the last character is a newline
+	if len(s) > 0 && s[len(s)-1] == '\n' {
+		// Return the string without the last character
+		return s[:len(s)-1]
+	}
+	// Return the original string if there is no newline at the end
+	return s
 }
 
 // Check if the "Value" exist in the env if not check if a "Value_FILE" exist and if still not just return default value
@@ -24,7 +30,7 @@ func	FileEnv(Value, Default string) string {
 			if err != nil {
 				_log.Log("error", "Error reading file")
 			}
-			return string(content)
+			return rmNewline(string(content))
 		}
 	}
 	return Default
