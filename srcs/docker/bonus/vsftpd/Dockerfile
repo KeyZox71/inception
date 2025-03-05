@@ -11,14 +11,14 @@ COPY			cmd /build/cmd
 COPY			internal /build/internal
 
 RUN				cd /build \
-				&& go build git.keyzox.me/42_adjoly/inception/cmd/getEnvFile
+				&& go build git.keyzox.me/42_adjoly/inception/cmd/getFileEnv
 
 FROM			scratch
 ADD				docker/alpine/alpine-minirootfs-3.21.2-x86_64.tar.gz /
 
 RUN				apk add vsftpd tzdata
 
-COPY			--from=builder /build/getEnvFile /bin/getEnvFile
+COPY			--from=builder /build/getFileEnv /bin/getFileEnv
 COPY			docker/bonus/vsftpd/entry.sh /docker-entrypoint
 COPY			docker/bonus/vsftpd/vsftpd.conf /etc/vsftpd/vsftpd.conf
 RUN				chmod +x /docker-entrypoint

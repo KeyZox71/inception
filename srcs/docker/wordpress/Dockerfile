@@ -10,7 +10,8 @@ COPY			cmd /build/cmd
 COPY			internal /build/internal
 
 RUN				cd /build \
-				&& go build git.keyzox.me/42_adjoly/inception/cmd/wordpress/entrypoint
+				&& go build git.keyzox.me/42_adjoly/inception/cmd/wordpress/entrypoint \
+				&& go build git.keyzox.me/42_adjoly/inception/cmd/getFileEnv
 
 FROM			scratch
 ADD				docker/alpine/alpine-minirootfs-3.21.2-x86_64.tar.gz /
@@ -19,6 +20,7 @@ LABEL			version="0.1"
 LABEL			maintainer="KeyZox"
 
 COPY			--from=builder /build/entrypoint /docker-entrypoint
+COPY			--from=builder /build/getFileEnv /bin/getFileEnv
 COPY			docker/wordpress/www-docker.conf /www-docker.conf
 
 RUN				set -x \
