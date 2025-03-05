@@ -116,6 +116,9 @@ services:
       - MYSQL_DATABASE=${DB_NAME}
     volumes:
       - wp-db:/var/lib/mysql
+    secrets:
+      - user-db-pass
+      - root-db-pass
     restart: unless-stopped
 
   static-site:
