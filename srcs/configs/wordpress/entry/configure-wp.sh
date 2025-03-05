@@ -1,14 +1,14 @@
 #!/bin/sh
 
 WP_DIR="/var/www/wordpress"
-#WP_VERSION="6.7.2"
+WP_VERSION="6.7.2"
 
-#if [ -f "$WP_DIR/index.php" ]; then
-#	echo "Already downloaded wordpress, skipping..."
-#else
-#	echo "Downloading Wordpress ${WP_VERSION}"
-#	wp --allow-root core download --version=${WP_VERSION} --path=${WP_DIR}
-#fi
+if [ -f "$WP_DIR/index.php" ]; then
+	echo "Already downloaded wordpress, skipping..."
+else
+	echo "Downloading Wordpress ${WP_VERSION}"
+	wp --allow-root core download --version=${WP_VERSION} --path=${WP_DIR}
+fi
 
 
 if [ -f "${WP_DIR}/wp-config.php" ]; then

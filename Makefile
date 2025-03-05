@@ -36,6 +36,7 @@ clean: stop
 	docker system prune -f
 
 fclean: clean
+	sudo rm -Rf /home/adjoly/data/*/*
 	docker system prune -af
 	docker volume prune -af
 

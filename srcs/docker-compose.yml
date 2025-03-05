@@ -65,7 +65,7 @@ services:
       - ./configs/nginx/entry:/docker-entrypoint.d
       - nginx-certs:/etc/nginx/ssl
     ports:
-      - "8443:443"
+      - "443:443"
     restart: unless-stopped
 
   wordpress-php:
@@ -110,10 +110,10 @@ services:
     networks:
       - inception
     environment:
-      - MYSQL_ROOT_PASSWORD=alpine
-      - MYSQL_PASSWORD=alpine
-      - MYSQL_USER=kanel
-      - MYSQL_DATABASE=knl
+      - MYSQL_ROOT_PASSWORD_FILE=/run/secrets/root-db-pass
+      - MYSQL_PASSWORD_FILE=/run/secrets/user-db-pass
+      - MYSQL_USER=${DB_USER}
+      - MYSQL_DATABASE=${DB_NAME}
     volumes:
       - wp-db:/var/lib/mysql
     secrets:
@@ -196,7 +196,7 @@ services:
     volumes:
       - wp-site:/var/ftp
     ports:
-      - 2100:21
+      - 21:21
       - 30000-30100:30000-30100
     secrets:
       - ftp-pass

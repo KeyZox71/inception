@@ -7,6 +7,10 @@ import (
 	"git.keyzox.me/42_adjoly/inception/internal/log"
 )
 
+func	removeNl(in string) string {
+
+}
+
 // Check if the "Value" exist in the env if not check if a "Value_FILE" exist and if still not just return default value
 func	FileEnv(Value, Default string) string {
 	val, is := os.LookupEnv(Value)

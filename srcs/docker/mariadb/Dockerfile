@@ -11,7 +11,8 @@ COPY			internal /build/internal
 
 RUN				cd /build \
 				&& go build git.keyzox.me/42_adjoly/inception/cmd/mariadb/entrypoint \
-				&& go build git.keyzox.me/42_adjoly/inception/cmd/mariadb/healthcheck
+				&& go build git.keyzox.me/42_adjoly/inception/cmd/mariadb/healthcheck \
+				&& go build git.keyzox.me/42_adjoly/inception/cmd/getFileEnv
 
 FROM			scratch
 ADD				docker/alpine/alpine-minirootfs-3.21.2-x86_64.tar.gz /
@@ -24,6 +25,7 @@ RUN				addgroup mysql \
 
 COPY			--from=builder /build/entrypoint /docker-entrypoint
 COPY			--from=builder /build/healthcheck /docker-healthcheck
+COPY			--from=builder /build/getFileEnv /bin/getFileEnv
 
 RUN				apk add --no-cache mariadb tzdata mariadb-client \
 				&& chmod +x /docker-healthcheck \
