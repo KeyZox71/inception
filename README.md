@@ -4,7 +4,7 @@ This repository contains the Inception project, which requires specific environm
 
 ## Environment Variables
 
-Create a `.env` file in the root directory of the project with the following environment variables:
+Create a `.env` file in the `srcs` directory of the project with the following environment variables:
 
 ```plaintext
 DB_USER=your_database_user
