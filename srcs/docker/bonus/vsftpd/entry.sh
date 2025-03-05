@@ -15,7 +15,7 @@ else
 	echo "$VSFTPD_USER:$(getEnvFile VSFTPD_PASSWORD)" | /usr/sbin/chpasswd > /dev/null
 
 	echo "[*] Giving vsftpd user ownership of WordPress data directory"
-    chown -R "$VSFTPD_USER:$VSFTPD_USER" /var/ftp
+    #chown -R "$VSFTPD_USER:$VSFTPD_USER" /var/ftp
 
 	echo $VSFTPD_USER | tee -a /etc/vsftpd/vsftpd.userlist > /dev/null
 

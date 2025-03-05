@@ -13,4 +13,5 @@ else
 	wp --allow-root plugin update --all
 	wp --allow-root redis enable
 	touch /redis.ok
+	chmod 777 -R /var/www/wordpress
 fi
