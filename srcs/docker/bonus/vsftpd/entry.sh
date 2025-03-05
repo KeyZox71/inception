@@ -12,7 +12,7 @@ else
 	echo "[*] Creating vsftpd user"
 
 	adduser -D $VSFTPD_USER
-    echo "$VSFTPD_USER:$VSFTPD_PASS" | /usr/sbin/chpasswd > /dev/null
+	echo "$VSFTPD_USER:$(getEnvFile VSFTPD_PASSWORD)" | /usr/sbin/chpasswd > /dev/null
 
 	echo "[*] Giving vsftpd user ownership of WordPress data directory"
     chown -R "$VSFTPD_USER:$VSFTPD_USER" /var/ftp

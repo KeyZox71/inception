@@ -2,9 +2,41 @@ name: inception
 
 volumes:
   wp-db:
+    driver: local
+    driver_opts:
+      type: none
+      device: /home/adjoly/data/wp-db
+      o: bind
   wp-site:
+    driver: local
+    driver_opts:
+      type: none
+      device: /home/adjoly/data/wp-site
+      o: bind
   nginx-certs:
+    driver: local
+    driver_opts:
+      type: none
+      device: /home/adjoly/data/certs
+      o: bind
   backup:
+    driver: local
+    driver_opts:
+      type: none
+      device: /home/adjoly/data/backup
+      o: bind
+
+secrets:
+  ftp-pass:
+    file: ../secrets/ftp/ftp_pass.txt
+  root-db-pass:
+    file: ../secrets/db/root_db_pass.txt
+  user-db-pass:
+    file: ../secrets/db/user_db_pass.txt
+  borg-passphrase:
+    file: ../secrets/borg/borg_passphrase.txt
+  wp-admin-pass:
+    file: ../secrets/wp/wp_admin_pass.txt
 
 networks:
   inception:
@@ -19,7 +51,6 @@ services:
     networks:
       - inception
     environment:
-      - TZ=Europe/Paris
       - NGINX_PHP_HOST=inception-wordp-php
       - NGINX_SSL_KEY_FILE=/etc/nginx/ssl/adjoly-wp.key
       - NGINX_SSL_CERT_FILE=/etc/nginx/ssl/adjoly-wp.crt
@@ -34,7 +65,7 @@ services:
       - ./configs/nginx/entry:/docker-entrypoint.d
       - nginx-certs:/etc/nginx/ssl
     ports:
-      - "8443:8443"
+      - "443:443"
     restart: unless-stopped
 
   wordpress-php:
@@ -50,12 +81,12 @@ services:
     environment:
       - WP_DB_NAME=knl
       - WP_DB_USER=kanel
-      - WP_DB_PASS=alpine
+      - WP_DB_PASS_FILE=/run/secrets/user-db-pass
       - WP_DB_HOST=db
       - WP_ADMIN_EMAIL=contact@kanel.ovh
       - WP_ADMIN_USER=kanel
-      - WP_ADMIN_PASS=alpine
-      - WP_URL=localhost:8443
+      - WP_ADMIN_PASS_FILE=/run/secrets/wp-admin-pass
+      - WP_URL=adjoly.42.fr
       - WP_TITLE=Kanel Supremacy
       - WP_SEARCH_ENGINE_VISIBILITY=false
       - PHP_MEMORY_LIMIT="512M"
@@ -63,10 +94,12 @@ services:
       - PHP_PORT=9000
       - REDIS_HOSTNAME=redis
       - REDIS_PORT=6379
-      - TZ=Europe/Paris
     volumes:
       - wp-site:/var/www/wordpress
       - ./configs/wordpress/entry:/docker-entrypoint.d
+    secrets:
+      - user-db-pass
+      - wp-admin-pass
     restart: unless-stopped
 
   db:
@@ -77,11 +110,10 @@ services:
     networks:
       - inception
     environment:
-      - MYSQL_ROOT_PASSWORD="alpine"
-      - MYSQL_PASSWORD="alpine"
+      - MYSQL_ROOT_PASSWORD_FILE=/run/secrets/root-db-pass
+      - MYSQL_PASSWORD_FILE=/run/secrets/user-db-pass
       - MYSQL_USER="kanel"
       - MYSQL_DATABASE="knl"
-      - TZ=Europe/Paris
     volumes:
       - wp-db:/var/lib/mysql
     restart: unless-stopped
@@ -94,7 +126,6 @@ services:
     depends_on:
       - nginx
     environment:
-      - TZ=Europe/Paris
       - NGINX_SSL_KEY_FILE=/etc/nginx/ssl/kanel-wp.key
       - NGINX_SSL_CERT_FILE=/etc/nginx/ssl/kanel-wp.crt
     restart: unless-stopped
@@ -107,10 +138,8 @@ services:
     networks:
       - inception
     environment:
-      - TZ=Europe/Paris # handled by tzdata
       - CRON_INTERVAL=0 2 * * * # handled by entrypoint
-      - BORG_PASSPHRASE=Hanky-Kangaroo-Thinning5-Statute-Mascot-Islamist
-      - BORG_COMPRESS=
+      - BORG_PASSPHRASE_FILE=/run/secrets/borg-passphrase
       - BORG_PRUNE_KEEP_DAILY=3
       - BORG_PRUNE_KEEP_WEEKLY=2
       - BORG_PRUNE_KEEP_MONTHLY=1
@@ -124,6 +153,8 @@ services:
       - wp-db:/source/db
       - wp-site:/source/wordpress
       - backup:/backup
+    secrets:
+      - borg-passphrase
     restart: unless-stopped
 
   adminer:
@@ -158,10 +189,12 @@ services:
       - inception
     environment:
       - VSFTPD_USER=kanel
-      - VSFTPD_PASS=alpine
+      - VSFTPD_PASS_FILE=/run/secrets/ftp-pass
     volumes:
       - wp-site:/var/ftp
     ports:
       - 21:21
       - 30000-30100:30000-30100
+    secrets:
+      - ftp-pass
     restart: unless-stopped

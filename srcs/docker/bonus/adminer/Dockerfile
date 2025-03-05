@@ -9,7 +9,7 @@ VOLUME			/var/www/adminer
 COPY			docker/bonus/adminer/adminer-4.17.1-mysql.php /var/www/adminer/index.php
 
 RUN				apk update \
-				&& apk add php84 php84-mysqli php84-session curl \
+				&& apk add php84 php84-mysqli php84-session curl tzdata \
 				&& addgroup -S adminer \
 				&& adduser -S -G adminer adminer \
 				&& chown -R adminer:adminer /var/www/adminer \
